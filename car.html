@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Details | CarGo Car Rental</title>
+  <link rel="icon" href="image/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="page-banner" id="banner">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Home</a> / <a href="cars.html">Our Fleet</a> / <span id="crumbName">Vehicle</span></div>
+        <h1 id="carTitle">Vehicle details</h1>
+        <p id="carSubtitle"></p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" id="detailsRoot"></div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">You may also like</span>
+          <h2>Similar vehicles</h2>
+        </div>
+        <div class="car-grid" id="similarCars"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const car = findCar(getParam("id"));
+    const root = qs("#detailsRoot");
+
+    if (!car) {
+      qs("#carTitle").textContent = "Vehicle not found";
+      qs("#crumbName").textContent = "Not found";
+      root.innerHTML = `<div class="empty-state"><h3>We couldn't find that vehicle</h3><p>It may have been removed from our fleet.</p><a class="btn btn-primary" href="cars.html">Back to the fleet</a></div>`;
+      qs("#similarCars").closest("section").remove();
+    } else {
+      const pkg = PACKAGES[car.package];
+      document.title = `${car.name} | CarGo Car Rental`;
+      qs("#banner").style.backgroundImage = `url('${car.image}')`;
+      qs("#carTitle").textContent = car.name;
+      qs("#crumbName").textContent = car.name;
+      qs("#carSubtitle").textContent = `${car.type} · ${pkg.name} package · from ${formatRWF(pkg.kigali)} per day`;
+
+      root.innerHTML = `
+        <div class="details-layout">
+          <div>
+            <div class="details-hero"><img src="${car.image}" alt="${car.name}"></div>
+            <div class="spec-grid">
+              <div><span>Seats</span><strong>${car.seats}</strong></div>
+              <div><span>Gearbox</span><strong>${car.transmission}</strong></div>
+              <div><span>Fuel</span><strong>${car.fuel}</strong></div>
+              <div><span>Year</span><strong>${car.year}</strong></div>
+            </div>
+            <h2 style="font-size:1.5rem">About this vehicle</h2>
+            <p class="text-muted">${car.description}</p>
+            <h3 style="margin-top:28px">Features</h3>
+            <ul class="feature-list">${car.features.map((f) => `<li>${f}</li>`).join("")}</ul>
+          </div>
+
+          <aside class="side-card">
+            <span class="badge badge-${car.package}">${pkg.name} package</span>
+            <h3 style="margin-top:12px">Price calculator</h3>
+            <div class="price-rows" style="margin-top:0">
+              <div><span>In Kigali</span><strong>${formatRWF(pkg.kigali)}</strong></div>
+              <div><span>Outside Kigali</span><strong>${formatRWF(pkg.outside)}</strong></div>
+            </div>
+            <form id="calc">
+              <div class="form-group">
+                <label for="calcLocation">Destination</label>
+                <select id="calcLocation" name="location">${LOCATIONS.map((l) => `<option value="${l.value}">${l.label}</option>`).join("")}</select>
+              </div>
+              <div class="form-group">
+                <label for="calcDays">Number of days</label>
+                <input type="number" id="calcDays" name="days" min="1" max="60" value="3">
+                <span class="error-msg" id="daysError"></span>
+              </div>
+              <div class="calc-total">
+                <span id="calcLine">3 days × ${formatRWF(pkg.kigali)}</span>
+                <strong id="calcTotal">${formatRWF(pkg.kigali * 3)}</strong>
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">Continue to booking</button>
+            </form>
+          </aside>
+        </div>`;
+
+      const calc = qs("#calc");
+      function updateCalc() {
+        const days = Number(calc.days.value);
+        const valid = Number.isInteger(days) && days >= 1 && days <= 60;
+        qs("#daysError").textContent = valid ? "" : "Enter between 1 and 60 days.";
+        calc.days.closest(".form-group").classList.toggle("invalid", !valid);
+        if (!valid) return false;
+        const rate = rateFor(car, zoneOf(calc.location.value));
+        qs("#calcLine").textContent = `${days} day${days > 1 ? "s" : ""} × ${formatRWF(rate)}`;
+        qs("#calcTotal").textContent = formatRWF(rate * days);
+        return true;
+      }
+      calc.addEventListener("input", updateCalc);
+      calc.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!updateCalc()) return;
+        window.location.href = `booking.html?car=${car.id}&location=${calc.location.value}&days=${calc.days.value}`;
+      });
+
+      const similar = CARS.filter((c) => c.id !== car.id && c.package === car.package).slice(0, 3);
+      qs("#similarCars").innerHTML = similar.map((c, i) => carCardHTML(c, "kigali", i * 80)).join("");
+    }
+  </script>
+</body>
+</html>

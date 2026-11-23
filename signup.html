@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign up | CarGo Car Rental</title>
+  <link rel="icon" href="image/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="auth-page">
+    <div class="auth-visual" style="background-image:url('image/Gwagen-Hero.jpg')">
+      <span class="eyebrow">Join CarGo</span>
+      <h2>Create your free account</h2>
+      <p>Book faster, keep all your reservations in one place and get exclusive offers on Premium vehicles.</p>
+    </div>
+
+    <div class="auth-form-wrap">
+      <form class="auth-form" id="signupForm" novalidate>
+        <img class="logo" src="image/logo.png" alt="CarGo Car Rental">
+        <h1 style="font-size:2rem">Sign up</h1>
+        <p>Already have an account? <a href="login.html" id="loginLink">Log in</a></p>
+
+        <div class="alert alert-error hidden" id="signupError" role="alert"></div>
+
+        <div class="form-group">
+          <label for="name">Full name</label>
+          <input type="text" id="name" name="name" autocomplete="name" placeholder="e.g. Jean Mugisha">
+          <span class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com">
+          <span class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone number</label>
+          <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="07X XXX XXXX">
+          <span class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-field">
+            <input type="password" id="password" name="password" autocomplete="new-password" placeholder="At least 8 characters">
+            <button type="button" class="toggle-pass">Show</button>
+          </div>
+          <div class="strength" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          <span class="strength-label" id="strengthLabel">Use 8+ characters with upper & lower case letters and a number.</span>
+          <span class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm">Confirm password</label>
+          <div class="password-field">
+            <input type="password" id="confirm" name="confirm" autocomplete="new-password" placeholder="Repeat password">
+            <button type="button" class="toggle-pass">Show</button>
+          </div>
+          <span class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox"><input type="checkbox" name="terms"> I agree to the terms of service and privacy policy.</label>
+          <span class="error-msg"></span>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const rawNext = getParam("next") || "";
+    const next = /^[a-z]+\.html(\?[\w=&%.-]*)?$/i.test(rawNext) ? rawNext : "account.html";
+    if (rawNext) qs("#loginLink").href = "login.html?next=" + encodeURIComponent(rawNext);
+
+    if (Auth.current()) window.location.replace(next);
+
+    const form = qs("#signupForm");
+    const bars = qsa(".strength span");
+    const colors = ["#ef4444", "#f59e0b", "#3b82f6", "#16a34a"];
+    const labels = ["Weak", "Fair", "Good", "Strong"];
+
+    form.password.addEventListener("input", () => {
+      const v = form.password.value;
+      const score = passwordScore(v);
+      bars.forEach((b, i) => (b.style.background = i < score ? colors[score - 1] : ""));
+      qs("#strengthLabel").textContent = v ? `Strength: ${labels[Math.max(0, score - 1)]}` : "Use 8+ characters with upper & lower case letters and a number.";
+    });
+
+    attachValidation(form, {
+      name: [
+        [Validators.required, "Enter your full name."],
+        [Validators.name, "Enter first and last name (letters only)."]
+      ],
+      email: [
+        [Validators.required, "Enter your email address."],
+        [Validators.email, "Enter a valid email address."],
+        [(v) => !Auth.emailExists(v), "This email is already registered. Try logging in."]
+      ],
+      phone: [
+        [Validators.required, "Enter your phone number."],
+        [Validators.phone, "Enter a valid Rwandan number, e.g. 0788 123 456."]
+      ],
+      password: [
+        [Validators.required, "Create a password."],
+        [Validators.strongPassword, "Use 8+ characters with upper & lower case and a number."]
+      ],
+      confirm: [
+        [Validators.required, "Please confirm your password."],
+        [(v, f) => v === f.password.value, "Passwords do not match."]
+      ],
+      terms: [[Validators.required, "You must accept the terms to continue."]]
+    }, (data) => {
+      const result = Auth.signup({
+        name: data.name.trim().replace(/\s+/g, " "),
+        email: data.email.trim().toLowerCase(),
+        phone: data.phone.replace(/[\s-]/g, ""),
+        password: data.password
+      });
+      if (!result.ok) {
+        qs("#signupError").textContent = result.error;
+        qs("#signupError").classList.remove("hidden");
+        return;
+      }
+      Auth.login(result.user.email, result.user.password);
+      toast("Account created — welcome to CarGo!");
+      setTimeout(() => (window.location.href = next), 800);
+    });
+  </script>
+</body>
+</html>

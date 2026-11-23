@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Fleet | CarGo Car Rental</title>
+  <link rel="icon" href="image/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="page-banner" style="background-image:url('image/lc200.jfif')">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Home</a> / Our Fleet</div>
+        <h1>Our Fleet</h1>
+        <p>13 well-maintained vehicles across two packages. Filter by what you need and see live prices for Kigali or upcountry trips.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container fleet-layout">
+        <!-- Filters -->
+        <aside class="filters" aria-label="Filter vehicles">
+          <h3>Filter vehicles</h3>
+
+          <div class="form-group">
+            <label for="search">Search</label>
+            <input type="search" id="search" placeholder="e.g. Land Cruiser">
+          </div>
+
+          <div class="form-group">
+            <label>Trip area</label>
+            <div class="chip-group" id="zoneChips">
+              <button type="button" class="chip" data-value="kigali">In Kigali</button>
+              <button type="button" class="chip" data-value="outside">Outside Kigali</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Package</label>
+            <div class="chip-group" id="packageChips">
+              <button type="button" class="chip" data-value="all">All</button>
+              <button type="button" class="chip" data-value="standard">Standard</button>
+              <button type="button" class="chip" data-value="premium">Premium</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="typeFilter">Vehicle type</label>
+            <select id="typeFilter"></select>
+          </div>
+
+          <div class="form-group">
+            <label for="seatsFilter">Minimum seats</label>
+            <select id="seatsFilter">
+              <option value="0">Any</option>
+              <option value="5">5+</option>
+              <option value="7">7+</option>
+              <option value="14">14+</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn btn-outline btn-block btn-sm" id="resetFilters">Reset filters</button>
+        </aside>
+
+        <!-- Results -->
+        <div>
+          <div class="fleet-toolbar">
+            <p class="text-muted" style="margin:0"><strong id="resultCount">0</strong> vehicles found</p>
+            <select id="sortBy" aria-label="Sort vehicles">
+              <option value="recommended">Sort: Recommended</option>
+              <option value="price-asc">Price: Low to high</option>
+              <option value="price-desc">Price: High to low</option>
+              <option value="seats-desc">Most seats</option>
+              <option value="name-asc">Name: A to Z</option>
+            </select>
+          </div>
+          <div class="car-grid" id="carGrid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const state = {
+      search: "",
+      zone: getParam("zone") === "outside" ? "outside" : "kigali",
+      pkg: ["standard", "premium"].includes(getParam("package")) ? getParam("package") : "all",
+      type: "all",
+      seats: 0,
+      sort: "recommended"
+    };
+
+    const types = [...new Set(CARS.map((c) => c.type))].sort();
+    qs("#typeFilter").innerHTML = `<option value="all">All types</option>` + types.map((t) => `<option>${t}</option>`).join("");
+
+    function syncChips() {
+      qsa("#zoneChips .chip").forEach((c) => c.classList.toggle("active", c.dataset.value === state.zone));
+      qsa("#packageChips .chip").forEach((c) => c.classList.toggle("active", c.dataset.value === state.pkg));
+    }
+
+    function render() {
+      let list = CARS.filter((car) => {
+        const text = (car.name + " " + car.type + " " + car.fuel).toLowerCase();
+        return (
+          text.includes(state.search.toLowerCase()) &&
+          (state.pkg === "all" || car.package === state.pkg) &&
+          (state.type === "all" || car.type === state.type) &&
+          car.seats >= state.seats
+        );
+      });
+
+      const sorters = {
+        "price-asc": (a, b) => rateFor(a, state.zone) - rateFor(b, state.zone),
+        "price-desc": (a, b) => rateFor(b, state.zone) - rateFor(a, state.zone),
+        "seats-desc": (a, b) => b.seats - a.seats,
+        "name-asc": (a, b) => a.name.localeCompare(b.name)
+      };
+      if (sorters[state.sort]) list = [...list].sort(sorters[state.sort]);
+
+      qs("#resultCount").textContent = list.length;
+      qs("#carGrid").innerHTML = list.length
+        ? list.map((car, i) => carCardHTML(car, state.zone, i * 50)).join("")
+        : `<div class="empty-state" style="grid-column:1/-1"><h3>No vehicles match</h3><p>Try clearing a filter or searching for something else.</p></div>`;
+
+      syncChips();
+      const params = new URLSearchParams();
+      if (state.pkg !== "all") params.set("package", state.pkg);
+      if (state.zone === "outside") params.set("zone", "outside");
+      try {
+        history.replaceState(null, "", "cars.html" + (params.toString() ? "?" + params : ""));
+      } catch (e) { /* some browsers block this on file:// URLs */ }
+    }
+
+    qs("#search").addEventListener("input", (e) => { state.search = e.target.value; render(); });
+    qs("#typeFilter").addEventListener("change", (e) => { state.type = e.target.value; render(); });
+    qs("#seatsFilter").addEventListener("change", (e) => { state.seats = Number(e.target.value); render(); });
+    qs("#sortBy").addEventListener("change", (e) => { state.sort = e.target.value; render(); });
+    qsa("#zoneChips .chip").forEach((c) => c.addEventListener("click", () => { state.zone = c.dataset.value; render(); }));
+    qsa("#packageChips .chip").forEach((c) => c.addEventListener("click", () => { state.pkg = c.dataset.value; render(); }));
+    qs("#resetFilters").addEventListener("click", () => {
+      Object.assign(state, { search: "", zone: "kigali", pkg: "all", type: "all", seats: 0, sort: "recommended" });
+      qs("#search").value = "";
+      qs("#typeFilter").value = "all";
+      qs("#seatsFilter").value = "0";
+      qs("#sortBy").value = "recommended";
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

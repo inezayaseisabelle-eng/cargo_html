@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account | CarGo Car Rental</title>
+  <link rel="icon" href="image/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="section">
+      <div class="container" id="accountRoot"></div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = Auth.current();
+    if (!user) window.location.replace("login.html?next=account.html");
+
+    function render() {
+      const list = Bookings.forUser(user.email).slice().reverse();
+      const active = list.filter((b) => b.status === "confirmed");
+      const spent = active.reduce((sum, b) => sum + b.total, 0);
+      const days = active.reduce((sum, b) => sum + b.days, 0);
+
+      qs("#accountRoot").innerHTML = `
+        <div class="account-head">
+          <span class="avatar">${escapeHTML(initials(user.name))}</span>
+          <div>
+            <span class="eyebrow" style="margin:0">My account</span>
+            <h1 style="font-size:2rem;margin:0">Hello, ${escapeHTML(user.name)}</h1>
+            <p class="text-muted" style="margin:0">${escapeHTML(user.email)} · ${escapeHTML(user.phone || "")}</p>
+          </div>
+          <a class="btn btn-primary" href="booking.html" style="margin-left:auto">+ New booking</a>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card"><span>Active bookings</span><strong>${active.length}</strong></div>
+          <div class="stat-card"><span>Rental days booked</span><strong>${days}</strong></div>
+          <div class="stat-card"><span>Total value</span><strong>${formatRWF(spent)}</strong></div>
+        </div>
+
+        <h2 style="font-size:1.5rem">My bookings</h2>
+        ${list.length ? list.map((b) => `
+          <div class="booking-item">
+            <img src="${b.image}" alt="${escapeHTML(b.carName)}">
+            <div>
+              <h4>${escapeHTML(b.carName)} <span class="status status-${b.status}">${b.status}</span></h4>
+              <p>Ref <strong>${b.id}</strong> · ${b.startDate} → ${b.endDate} · ${b.days} day${b.days > 1 ? "s" : ""}</p>
+              <p>${b.zone === "kigali" ? "Inside Kigali" : "Outside Kigali"} · ${formatRWF(b.rate)}/day · Total <strong>${formatRWF(b.total)}</strong></p>
+            </div>
+            ${b.status === "confirmed" ? `<button class="btn btn-outline btn-sm" data-cancel="${b.id}">Cancel</button>` : "<span></span>"}
+          </div>`).join("")
+        : `<div class="empty-state"><h3>No bookings yet</h3><p>When you book a car it will show up here.</p><a class="btn btn-primary" href="cars.html">Browse the fleet</a></div>`}
+      `;
+
+      qsa("[data-cancel]").forEach((btn) => btn.addEventListener("click", () => {
+        if (!confirm("Cancel booking " + btn.dataset.cancel + "?")) return;
+        Bookings.cancel(btn.dataset.cancel);
+        toast("Booking cancelled.");
+        render();
+      }));
+    }
+
+    if (user) render();
+  </script>
+</body>
+</html>

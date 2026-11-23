@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Car | CarGo Car Rental</title>
+  <link rel="icon" href="image/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="page-banner" style="background-image:url('image/byd-design.webp')">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Home</a> / Book a Car</div>
+        <h1>Book your car</h1>
+        <p>Fill in your trip and driver details. Your total updates instantly as you choose.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" id="bookingRoot"></div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const root = qs("#bookingRoot");
+    const user = Auth.current();
+
+    if (!user) {
+      // Booking is only for logged-in users
+      const next = encodeURIComponent("booking.html" + window.location.search);
+      root.innerHTML = `
+        <div class="card" style="max-width:560px;margin:0 auto;text-align:center">
+          <div class="success-icon" style="background:var(--orange-100);color:var(--orange-600)">🔒</div>
+          <h2 style="font-size:1.6rem">Log in to book a car</h2>
+          <p class="text-muted">You need a CarGo account to make a booking. It only takes a minute — or use the demo account.</p>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px">
+            <a class="btn btn-primary" href="login.html?next=${next}">Log in</a>
+            <a class="btn btn-outline" href="signup.html?next=${next}">Create account</a>
+          </div>
+        </div>`;
+    } else {
+      renderForm();
+    }
+
+    function renderForm() {
+      const optionsFor = (pkg) => CARS.filter((c) => c.package === pkg).map((c) => `<option value="${c.id}">${c.name} (${c.type})</option>`).join("");
+
+      root.innerHTML = `
+        <div class="booking-layout">
+          <form class="card" id="bookingForm" novalidate>
+            <div class="form-section-title"><span>1</span> Trip details</div>
+            <div class="form-group">
+              <label for="car">Vehicle</label>
+              <select id="car" name="car">
+                <option value="">Select a vehicle…</option>
+                <optgroup label="Standard — RWF 30k Kigali / 50k outside">${optionsFor("standard")}</optgroup>
+                <optgroup label="Premium — RWF 50k Kigali / 70k outside">${optionsFor("premium")}</optgroup>
+              </select>
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="location">Destination</label>
+                <select id="location" name="location">
+                  <option value="">Where will you drive?</option>
+                  ${LOCATIONS.map((l) => `<option value="${l.value}">${l.label}</option>`).join("")}
+                </select>
+                <span class="error-msg"></span>
+              </div>
+              <div class="form-group">
+                <label for="pickupPoint">Pick-up address in Kigali</label>
+                <input type="text" id="pickupPoint" name="pickupPoint" placeholder="e.g. Kigali Airport, KG 7 Ave">
+                <span class="error-msg"></span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="startDate">Pick-up date</label>
+                <input type="date" id="startDate" name="startDate">
+                <span class="error-msg"></span>
+              </div>
+              <div class="form-group">
+                <label for="endDate">Return date</label>
+                <input type="date" id="endDate" name="endDate">
+                <span class="error-msg"></span>
+              </div>
+            </div>
+
+            <div class="form-section-title"><span>2</span> Driver details</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fullName">Full name</label>
+                <input type="text" id="fullName" name="fullName" autocomplete="name">
+                <span class="error-msg"></span>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" autocomplete="email">
+                <span class="error-msg"></span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">Phone number</label>
+                <input type="tel" id="phone" name="phone" placeholder="07X XXX XXXX" autocomplete="tel">
+                <span class="error-msg"></span>
+              </div>
+              <div class="form-group">
+                <label for="idNumber">National ID or passport</label>
+                <input type="text" id="idNumber" name="idNumber" placeholder="16-digit ID or passport no.">
+                <span class="error-msg"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="licence">Driving licence number</label>
+              <input type="text" id="licence" name="licence" placeholder="e.g. RW1234567">
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group">
+              <label for="notes">Notes (optional)</label>
+              <textarea id="notes" name="notes" maxlength="300" placeholder="Child seat, flight number, etc."></textarea>
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group">
+              <label class="checkbox"><input type="checkbox" name="terms"> I agree to the rental terms and confirm the driver is at least 21 years old.</label>
+              <span class="error-msg"></span>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit">Confirm booking</button>
+          </form>
+
+          <aside class="side-card" id="summary" aria-live="polite"></aside>
+        </div>`;
+
+      const form = qs("#bookingForm");
+
+      // Prefill from URL + logged-in user
+      const preCar = getParam("car");
+      if (findCar(preCar)) form.car.value = preCar;
+      const preLoc = getParam("location");
+      if (LOCATIONS.some((l) => l.value === preLoc)) form.location.value = preLoc;
+      const preDays = Math.min(60, Math.max(1, parseInt(getParam("days"), 10) || 0));
+      form.startDate.min = todayISO();
+      form.endDate.min = todayISO(1);
+      if (preDays) {
+        form.startDate.value = todayISO(1);
+        form.endDate.value = todayISO(1 + preDays);
+      }
+      form.fullName.value = user.name;
+      form.email.value = user.email;
+      form.phone.value = user.phone || "";
+
+      const rules = {
+        car: [[Validators.required, "Please choose a vehicle."]],
+        location: [[Validators.required, "Please choose your destination."]],
+        pickupPoint: [[Validators.minLen(3), "Enter where we should deliver the car."]],
+        startDate: [
+          [Validators.required, "Choose a pick-up date."],
+          [(v) => v >= todayISO(), "Pick-up date can't be in the past."]
+        ],
+        endDate: [
+          [Validators.required, "Choose a return date."],
+          [(v, f) => !f.startDate.value || v > f.startDate.value, "Return date must be after pick-up."],
+          [(v, f) => !f.startDate.value || daysBetween(f.startDate.value, v) <= 60, "Maximum rental is 60 days."]
+        ],
+        fullName: [
+          [Validators.required, "Enter the driver's full name."],
+          [Validators.name, "Enter first and last name (letters only)."]
+        ],
+        email: [
+          [Validators.required, "Enter an email address."],
+          [Validators.email, "Enter a valid email, e.g. name@example.com."]
+        ],
+        phone: [
+          [Validators.required, "Enter a phone number."],
+          [Validators.phone, "Enter a valid Rwandan number, e.g. 0788 123 456."]
+        ],
+        idNumber: [
+          [Validators.required, "Enter your National ID or passport number."],
+          [Validators.idOrPassport, "National ID must be 16 digits starting with 1, or a valid passport no."]
+        ],
+        licence: [
+          [Validators.required, "Enter your driving licence number."],
+          [Validators.licence, "Licence number should be 6–16 letters or numbers."]
+        ],
+        notes: [[(v) => v.length <= 300, "Notes must be under 300 characters."]],
+        terms: [[Validators.required, "You must accept the rental terms."]]
+      };
+
+      function calc() {
+        const car = findCar(form.car.value);
+        const zone = form.location.value ? zoneOf(form.location.value) : "kigali";
+        const days = form.startDate.value && form.endDate.value ? daysBetween(form.startDate.value, form.endDate.value) : 0;
+        const rate = car ? rateFor(car, zone) : 0;
+        return { car, zone, days: days > 0 ? days : 0, rate, total: days > 0 ? rate * days : 0 };
+      }
+
+      function renderSummary() {
+        const { car, zone, days, rate, total } = calc();
+        const loc = LOCATIONS.find((l) => l.value === form.location.value);
+        qs("#summary").innerHTML = car
+          ? `<h3>Booking summary</h3>
+             <div class="summary-car"><img src="${car.image}" alt=""><div><strong>${car.name}</strong><br><span class="badge badge-${car.package}">${PACKAGES[car.package].name}</span></div></div>
+             <div class="summary-line"><span>Destination</span><span>${loc ? loc.label : "—"}</span></div>
+             <div class="summary-line"><span>Rate type</span><span>${zone === "kigali" ? "Inside Kigali" : "Outside Kigali"}</span></div>
+             <div class="summary-line"><span>Daily rate</span><span>${formatRWF(rate)}</span></div>
+             <div class="summary-line"><span>Duration</span><span>${days ? days + " day" + (days > 1 ? "s" : "") : "—"}</span></div>
+             <div class="calc-total" style="margin-top:18px"><span>Total</span><strong>${formatRWF(total)}</strong></div>
+             <p class="text-muted" style="font-size:.85rem;margin:0">Insurance & roadside assistance included. Pay on delivery.</p>`
+          : `<h3>Booking summary</h3><p class="text-muted">Choose a vehicle to see your price.</p>
+             <div class="price-rows">
+               <div><span>Standard</span><strong>${formatRWF(30000)}+</strong></div>
+               <div><span>Premium</span><strong>${formatRWF(50000)}+</strong></div>
+             </div>`;
+      }
+
+      form.addEventListener("input", renderSummary);
+      form.addEventListener("change", () => {
+        if (form.startDate.value) form.endDate.min = form.startDate.value;
+        renderSummary();
+      });
+      renderSummary();
+
+      attachValidation(form, rules, (data) => {
+        const { car, zone, days, rate, total } = calc();
+        const booking = Bookings.add({
+          userEmail: user.email,
+          carId: car.id,
+          carName: car.name,
+          image: car.image,
+          package: car.package,
+          location: data.location,
+          zone,
+          pickupPoint: data.pickupPoint.trim(),
+          startDate: data.startDate,
+          endDate: data.endDate,
+          days,
+          rate,
+          total,
+          driver: { name: data.fullName.trim(), email: data.email.trim(), phone: data.phone.trim() },
+          notes: data.notes.trim()
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        root.innerHTML = `
+          <div class="card success-box" style="max-width:620px;margin:0 auto">
+            <div class="success-icon">✓</div>
+            <h2 style="font-size:1.7rem">Booking confirmed!</h2>
+            <p class="text-muted">Thank you, ${escapeHTML(booking.driver.name.split(" ")[0])}. Your reference is <strong>${booking.id}</strong>.</p>
+            <div style="text-align:left;margin:24px 0">
+              <div class="summary-line"><span>Vehicle</span><span>${booking.carName}</span></div>
+              <div class="summary-line"><span>Dates</span><span>${booking.startDate} → ${booking.endDate} (${booking.days} days)</span></div>
+              <div class="summary-line"><span>Rate</span><span>${formatRWF(booking.rate)} / day (${zone === "kigali" ? "Kigali" : "Outside Kigali"})</span></div>
+              <div class="summary-line"><span>Total</span><span>${formatRWF(booking.total)}</span></div>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+              <a class="btn btn-primary" href="account.html">View my bookings</a>
+              <a class="btn btn-outline" href="cars.html">Browse more cars</a>
+            </div>
+          </div>`;
+        toast("Booking " + booking.id + " confirmed!");
+      });
+    }
+  </script>
+</body>
+</html>

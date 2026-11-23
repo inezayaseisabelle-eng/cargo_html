@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CarGo Car Rental — affordable car hire in Kigali and across Rwanda from RWF 30,000 per day.">
+  <title>CarGo Car Rental | Kigali, Rwanda</title>
+  <link rel="icon" href="image/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <span class="hero-badge">★ Rated 4.9 by 2,000+ drivers in Rwanda</span>
+          <h1>Drive Rwanda your way with <span class="text-orange">CarGo</span></h1>
+          <p class="lead">From quick trips around Kigali to safaris in Akagera and gorilla treks in Musanze — choose the right car at a clear daily price in Rwandan Francs.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="cars.html">Browse the fleet</a>
+            <a class="btn btn-ghost-light" href="pricing.html">See pricing</a>
+          </div>
+          <div class="hero-stats">
+            <div><strong>13+</strong><span>Vehicles</span></div>
+            <div><strong>RWF 30k</strong><span>Starting daily rate</span></div>
+            <div><strong>24/7</strong><span>Roadside support</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick search / price estimate -->
+    <section class="quick-search">
+      <div class="container">
+        <form id="quickSearch" novalidate>
+          <div class="form-group">
+            <label for="qsLocation">Where are you driving?</label>
+            <select id="qsLocation" name="location"></select>
+          </div>
+          <div class="form-group">
+            <label for="qsPackage">Package</label>
+            <select id="qsPackage" name="package">
+              <option value="standard">Standard</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="qsStart">Pick-up date</label>
+            <input type="date" id="qsStart" name="start">
+          </div>
+          <div class="form-group">
+            <label for="qsEnd">Return date</label>
+            <input type="date" id="qsEnd" name="end">
+          </div>
+          <button class="btn btn-primary" type="submit">Find cars</button>
+          <div class="estimate" aria-live="polite">
+            <span id="qsSummary">Standard · Kigali · 1 day</span>
+            <strong id="qsTotal">RWF 30,000</strong>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Why choose us -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Why CarGo</span>
+          <h2>Car rental made simple</h2>
+          <p>Honest pricing, well-maintained vehicles and a local team that knows every road in Rwanda.</p>
+        </div>
+        <div class="features">
+          <div class="feature reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <h3>Clear RWF pricing</h3>
+            <p>Two simple packages with one daily rate for Kigali and one for upcountry. No hidden fees.</p>
+          </div>
+          <div class="feature reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <h3>Fully insured</h3>
+            <p>Every rental includes insurance and 24/7 roadside assistance wherever you drive.</p>
+          </div>
+          <div class="feature reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <h3>Free Kigali delivery</h3>
+            <p>We bring the car to your home, hotel or Kigali International Airport.</p>
+          </div>
+          <div class="feature reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-6 0v4M5 9h14l1 12H4L5 9z"/></svg></div>
+            <h3>Book in minutes</h3>
+            <p>Pick a car, choose your dates and destination, and get instant confirmation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured cars (rendered by JS) -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Popular choices</span>
+          <h2>Featured vehicles</h2>
+          <p>A taste of our fleet — from economical hybrids to iconic 4x4s.</p>
+        </div>
+        <div class="car-grid" id="featuredCars"></div>
+        <div style="text-align:center;margin-top:40px">
+          <a class="btn btn-outline" href="cars.html">View all vehicles</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section dark-section">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">How it works</span>
+          <h2>On the road in three steps</h2>
+          <p>No paperwork headaches. Just pick, book and drive.</p>
+        </div>
+        <div class="steps">
+          <div class="step reveal">
+            <h3>Choose your car</h3>
+            <p>Browse the fleet and filter by package, type and number of seats.</p>
+          </div>
+          <div class="step reveal">
+            <h3>Pick dates & destination</h3>
+            <p>Kigali trips use the city rate; anywhere else in Rwanda uses the upcountry rate.</p>
+          </div>
+          <div class="step reveal">
+            <h3>Drive away</h3>
+            <p>We deliver the car, hand over the keys and you're ready to explore.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Packages teaser -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Packages</span>
+          <h2>Two packages. Simple prices.</h2>
+          <p>Daily rates in Rwandan Francs, depending on whether you stay in Kigali or travel beyond.</p>
+        </div>
+        <div class="pricing-grid" id="pricingTeaser"></div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Testimonials</span>
+          <h2>What our customers say</h2>
+        </div>
+        <div class="testimonials" id="testimonials"></div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="container">
+      <div class="cta-band reveal">
+        <span class="eyebrow">Planning a safari?</span>
+        <h2>Explore Akagera, Nyungwe & the Volcanoes in a Land Cruiser</h2>
+        <p>Our Premium 4x4s are ready for any adventure — RWF 70,000 per day outside Kigali, insurance included.</p>
+        <a class="btn btn-primary" href="booking.html?car=safari-land-cruiser">Book a safari car</a>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Featured cars: a mix from both packages
+    const featuredIds = ["toyota-yaris", "byd-song-plus", "mercedes-c200", "toyota-lc300", "mercedes-g-class", "safari-land-cruiser"];
+    qs("#featuredCars").innerHTML = featuredIds.map((id, i) => carCardHTML(findCar(id), "kigali", i * 80)).join("");
+
+    // Package teaser cards
+    qs("#pricingTeaser").innerHTML = Object.values(PACKAGES).map((p) => `
+      <div class="price-card reveal ${p.id === "premium" ? "featured" : ""}">
+        ${p.id === "premium" ? '<span class="badge badge-premium ribbon">Most popular</span>' : ""}
+        <h3>${p.name} package</h3>
+        <p class="price-note">${p.tagline}</p>
+        <div class="price-rows">
+          <div><span>In Kigali</span><strong>${formatRWF(p.kigali)}</strong></div>
+          <div><span>Outside Kigali</span><strong>${formatRWF(p.outside)}</strong></div>
+        </div>
+        <a class="btn ${p.id === "premium" ? "btn-primary" : "btn-navy"} btn-block" href="cars.html?package=${p.id}">See ${p.name} cars</a>
+      </div>`).join("");
+
+    qs("#testimonials").innerHTML = TESTIMONIALS.map((t) => `
+      <div class="testimonial reveal">
+        <div class="stars">★★★★★</div>
+        <p>“${t.text}”</p>
+        <div class="who"><span class="avatar">${initials(t.name)}</span><div><strong>${t.name}</strong><span>${t.role}</span></div></div>
+      </div>`).join("");
+
+    // Quick search with live estimate
+    const form = qs("#quickSearch");
+    form.location.innerHTML = LOCATIONS.map((l) => `<option value="${l.value}">${l.label}</option>`).join("");
+    form.start.min = todayISO();
+    form.start.value = todayISO(1);
+    form.end.min = todayISO(2);
+    form.end.value = todayISO(4);
+
+    function updateEstimate() {
+      if (form.end.value <= form.start.value) form.end.value = new Date(new Date(form.start.value).getTime() + 86400000).toISOString().split("T")[0];
+      form.end.min = form.start.value;
+      const days = Math.max(1, daysBetween(form.start.value, form.end.value));
+      const zone = zoneOf(form.location.value);
+      const pkg = PACKAGES[form.package.value];
+      const rate = pkg[zone];
+      qs("#qsSummary").textContent = `${pkg.name} · ${zone === "kigali" ? "Kigali" : "Outside Kigali"} · ${days} day${days > 1 ? "s" : ""} × ${formatRWF(rate)}`;
+      qs("#qsTotal").textContent = formatRWF(rate * days);
+    }
+
+    ["location", "package", "start", "end"].forEach((n) => form[n].addEventListener("change", updateEstimate));
+    updateEstimate();
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const zone = zoneOf(form.location.value);
+      window.location.href = `cars.html?package=${form.package.value}&zone=${zone}`;
+    });
+  </script>
+</body>
+</html>

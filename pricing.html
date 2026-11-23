@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing | CarGo Car Rental</title>
+  <link rel="icon" href="image/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="page-banner" style="background-image:url('image/mercedes-c200.jpg')">
+      <div class="container">
+        <div class="breadcrumb"><a href="index.html">Home</a> / Pricing</div>
+        <h1>Simple, transparent pricing</h1>
+        <p>Two packages, priced per day in Rwandan Francs. One rate for trips inside Kigali, another for travel anywhere beyond the city.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="text-align:center">
+        <div class="zone-toggle" role="group" aria-label="Trip area">
+          <button type="button" data-zone="kigali" class="active">Inside Kigali</button>
+          <button type="button" data-zone="outside">Outside Kigali</button>
+        </div>
+        <div class="pricing-grid" id="pricingCards" style="text-align:left"></div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Full rate card</span>
+          <h2>Daily rate per vehicle</h2>
+          <p>All prices are per day and include insurance and roadside assistance.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="price-table">
+            <thead>
+              <tr><th>Vehicle</th><th>Type</th><th>Package</th><th>In Kigali</th><th>Outside Kigali</th><th></th></tr>
+            </thead>
+            <tbody id="rateTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container" style="max-width:820px">
+        <div class="section-head">
+          <span class="eyebrow">FAQ</span>
+          <h2>Pricing questions</h2>
+        </div>
+        <div class="faq">
+          <details open>
+            <summary>When does the "Outside Kigali" rate apply?</summary>
+            <p>Whenever your destination is outside the City of Kigali — for example Musanze, Rubavu, Huye, Nyungwe or Akagera. Standard cars go from RWF 30,000 to RWF 50,000 per day, and Premium cars from RWF 50,000 to RWF 70,000 per day.</p>
+          </details>
+          <details>
+            <summary>Is fuel included?</summary>
+            <p>No. Vehicles are delivered with a full tank and should be returned full. Electric vehicles are delivered fully charged.</p>
+          </details>
+          <details>
+            <summary>Do I need a driving licence?</summary>
+            <p>Yes. You need a valid driving licence and a National ID or passport. International visitors can use an international driving permit.</p>
+          </details>
+          <details>
+            <summary>Can I cancel my booking?</summary>
+            <p>Yes. You can cancel any upcoming booking from your account page free of charge.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let zone = "kigali";
+
+    function renderCards() {
+      qs("#pricingCards").innerHTML = Object.values(PACKAGES).map((p) => {
+        const count = CARS.filter((c) => c.package === p.id).length;
+        return `
+        <div class="price-card ${p.id === "premium" ? "featured" : ""}">
+          ${p.id === "premium" ? '<span class="badge badge-premium ribbon">Most popular</span>' : ""}
+          <h3>${p.name} package</h3>
+          <p class="price-note">${p.tagline} · ${count} vehicles</p>
+          <p class="amount">${formatRWF(p[zone])} <small>/ day</small></p>
+          <p class="price-note">${zone === "kigali" ? "Within the City of Kigali" : "Anywhere outside Kigali"}</p>
+          <ul>${p.perks.map((perk) => `<li>${perk}</li>`).join("")}</ul>
+          <a class="btn ${p.id === "premium" ? "btn-primary" : "btn-navy"} btn-block" href="cars.html?package=${p.id}${zone === "outside" ? "&zone=outside" : ""}">Choose ${p.name}</a>
+        </div>`;
+      }).join("");
+    }
+
+    qsa(".zone-toggle button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        zone = btn.dataset.zone;
+        qsa(".zone-toggle button").forEach((b) => b.classList.toggle("active", b === btn));
+        renderCards();
+      });
+    });
+
+    qs("#rateTable").innerHTML = CARS.map((c) => `
+      <tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.type}</td>
+        <td><span class="badge badge-${c.package}">${PACKAGES[c.package].name}</span></td>
+        <td>${formatRWF(PACKAGES[c.package].kigali)}</td>
+        <td>${formatRWF(PACKAGES[c.package].outside)}</td>
+        <td><a class="btn btn-outline btn-sm" href="booking.html?car=${c.id}">Book</a></td>
+      </tr>`).join("");
+
+    renderCards();
+  </script>
+</body>
+</html>
